@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Year 7 IGCSE Maths Quiz — NextArc</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #07081a;
+    --surface: #111230;
+    --surface2: #1a1d42;
+    --border: #2a2e6a;
+    --cyan: #00d4ff;
+    --amber: #ffd443;
+    --green: #1eff9c;
+    --red: #ff4d6d;
+    --purple: #a78bfa;
+    --text: #e8eaf6;
+    --muted: #8891c8;
+    --radius: 16px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BACKGROUND STARS */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,212,255,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 90% 80%, rgba(167,139,250,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app { position: relative; z-index: 1; }
+
+  /* SCREENS */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ========== WELCOME SCREEN ========== */
+  #welcome {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem;
+    text-align: center;
+  }
+  #welcome.active { display: flex; }
+  .logo-badge {
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.9rem; font-weight: 700;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .welcome-title {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+  .welcome-title span { color: var(--cyan); }
+  .welcome-sub {
+    font-size: 1.1rem; color: var(--muted);
+    margin-bottom: 2.5rem; max-width: 480px;
+  }
+  .topic-pills {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    justify-content: center; margin-bottom: 2.5rem;
+    max-width: 540px;
+  }
+  .pill {
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.8rem; font-weight: 700;
+    border: 1.5px solid;
+  }
+  .pill-prob { border-color: var(--cyan); color: var(--cyan); background: rgba(0,212,255,0.08); }
+  .pill-tally { border-color: var(--amber); color: var(--amber); background: rgba(255,212,67,0.08); }
+  .pill-alg { border-color: var(--purple); color: var(--purple); background: rgba(167,139,250,0.1); }
+  .pill-ratio { border-color: var(--green); color: var(--green); background: rgba(30,255,156,0.08); }
+  .pill-units { border-color: #f97316; color: #f97316; background: rgba(249,115,22,0.08); }
+  .pill-frac { border-color: #e879f9; color: #e879f9; background: rgba(232,121,249,0.08); }
+
+  .info-cards {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    justify-content: center; margin-bottom: 2.5rem;
+  }
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.5rem;
+    text-align: center;
+  }
+  .info-card .val {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.5rem; font-weight: 700; color: var(--cyan);
+  }
+  .info-card .lbl { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+  .name-input-wrap { margin-bottom: 1.5rem; width: 100%; max-width: 320px; }
+  .name-input-wrap label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.5rem; font-weight: 600; }
+  .name-input-wrap input {
+    width: 100%; padding: 0.8rem 1rem;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 12px; color: var(--text);
+    font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 600;
+    outline: none; transition: border-color 0.2s;
+  }
+  .name-input-wrap input:focus { border-color: var(--cyan); }
+  .btn-start {
+    background: linear-gradient(135deg, var(--cyan), #0099cc);
+    color: #07081a; font-family: 'Nunito', sans-serif;
+    font-size: 1.1rem; font-weight: 900;
+    padding: 1rem 3rem; border: none; border-radius: 999px;
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 24px rgba(0,212,255,0.35);
+    letter-spacing: 0.03em;
+  }
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,212,255,0.5); }
+  .btn-start:active { transform: translateY(0); }
+
+  /* ========== QUIZ SCREEN ========== */
+  #quiz { min-height: 100vh; padding: 1rem; }
+  #quiz.active { display: flex; flex-direction: column; }
+
+  .quiz-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.5rem;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    gap: 1rem; flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    position: sticky; top: 1rem; z-index: 10;
+    backdrop-filter: blur(12px);
+  }
+  .q-counter {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.9rem; color: var(--muted);
+  }
+  .q-counter strong { color: var(--cyan); font-size: 1.1rem; }
+
+  .timer-wrap { display: flex; align-items: center; gap: 0.5rem; }
+  .timer-icon { font-size: 1.2rem; }
+  #timer {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.3rem; font-weight: 700; color: var(--amber);
+    min-width: 72px;
+    transition: color 0.3s;
+  }
+  #timer.urgent { color: var(--red); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+
+  .progress-bar-outer {
+    width: 100%; background: var(--border);
+    border-radius: 999px; height: 8px; overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--cyan), var(--purple));
+    transition: width 0.4s ease;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 720px; margin: 0 auto 1.5rem auto;
+    animation: slideUp 0.3s ease;
+    flex: 1;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .topic-tag {
+    display: inline-block;
+    font-size: 0.72rem; font-weight: 800;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px; margin-bottom: 1rem;
+    border: 1.5px solid;
+  }
+
+  .question-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem; color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+  .question-text {
+    font-size: 1.15rem; font-weight: 700;
+    line-height: 1.5; margin-bottom: 1.5rem;
+    color: var(--text);
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  @media (max-width: 500px) {
+    .options-grid { grid-template-columns: 1fr; }
+  }
+
+  .option-btn {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem; font-weight: 600;
+    padding: 0.9rem 1.1rem;
+    text-align: left; cursor: pointer;
+    transition: all 0.18s;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--cyan);
+    background: rgba(0,212,255,0.08);
+    transform: translateY(-1px);
+  }
+  .option-btn.selected {
+    border-color: var(--cyan);
+    background: rgba(0,212,255,0.12);
+    color: var(--cyan);
+  }
+  .option-label {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem; font-weight: 700;
+    flex-shrink: 0; transition: all 0.18s;
+  }
+  .option-btn.selected .option-label {
+    background: var(--cyan); color: var(--bg);
+  }
+
+  .nav-buttons {
+    display: flex; gap: 0.75rem; justify-content: center;
+    flex-wrap: wrap; max-width: 720px; margin: 0 auto;
+    padding-bottom: 2rem;
+  }
+  .btn-nav {
+    padding: 0.75rem 2rem;
+    border-radius: 999px; border: none;
+    font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 800;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .btn-prev {
+    background: var(--surface2); border: 1.5px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-prev:hover { border-color: var(--muted); color: var(--text); }
+  .btn-next {
+    background: var(--surface2); border: 1.5px solid var(--cyan);
+    color: var(--cyan);
+  }
+  .btn-next:hover { background: rgba(0,212,255,0.1); }
+  .btn-submit {
+    background: linear-gradient(135deg, var(--green), #00a86b);
+    color: var(--bg); font-weight: 900;
+  }
+  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(30,255,156,0.4); }
+
+  .q-dots-wrap {
+    max-width: 720px; margin: 0 auto 1.5rem auto;
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .q-dot {
+    width: 28px; height: 28px; border-radius: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s;
+    border: 1.5px solid var(--border);
+    background: var(--surface2); color: var(--muted);
+  }
+  .q-dot.answered { background: rgba(0,212,255,0.15); border-color: var(--cyan); color: var(--cyan); }
+  .q-dot.current { background: var(--cyan); color: var(--bg); border-color: var(--cyan); }
+
+  /* ========== RESULTS SCREEN ========== */
+  #results { padding: 2rem 1rem; }
+  #results.active { display: block; }
+
+  .results-header { text-align: center; margin-bottom: 2.5rem; }
+  .score-circle {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem auto;
+    border: 4px solid;
+  }
+  .score-circle.excellent { border-color: var(--green); box-shadow: 0 0 40px rgba(30,255,156,0.3); }
+  .score-circle.good { border-color: var(--cyan); box-shadow: 0 0 40px rgba(0,212,255,0.3); }
+  .score-circle.average { border-color: var(--amber); box-shadow: 0 0 40px rgba(255,212,67,0.3); }
+  .score-circle.poor { border-color: var(--red); box-shadow: 0 0 40px rgba(255,77,109,0.3); }
+  .score-num { font-family: 'Space Mono', monospace; font-size: 2.2rem; font-weight: 700; }
+  .score-total { font-size: 0.8rem; color: var(--muted); }
+  .results-title { font-size: 1.8rem; font-weight: 900; margin-bottom: 0.3rem; }
+  .results-sub { color: var(--muted); font-size: 0.95rem; }
+
+  .stats-row {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    justify-content: center; max-width: 600px; margin: 0 auto 2rem auto;
+  }
+  .stat-box {
+    flex: 1; min-width: 120px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1rem;
+    text-align: center;
+  }
+  .stat-box .sv { font-family: 'Space Mono', monospace; font-size: 1.4rem; font-weight: 700; }
+  .stat-box .sl { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+
+  .topic-breakdown {
+    max-width: 700px; margin: 0 auto 2rem auto;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.5rem;
+  }
+  .topic-breakdown h3 { font-size: 1rem; font-weight: 800; margin-bottom: 1rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+  .topic-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; }
+  .topic-name { font-size: 0.85rem; font-weight: 700; width: 140px; flex-shrink: 0; }
+  .topic-bar-outer { flex: 1; background: var(--border); border-radius: 999px; height: 10px; overflow: hidden; }
+  .topic-bar-inner { height: 100%; border-radius: 999px; transition: width 0.6s ease; }
+  .topic-score-lbl { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); width: 36px; text-align: right; }
+
+  .corrections-title {
+    max-width: 720px; margin: 0 auto 1rem auto;
+    font-size: 1.2rem; font-weight: 800; color: var(--text);
+    padding-left: 0.5rem;
+  }
+  .correction-card {
+    max-width: 720px; margin: 0 auto 1rem auto;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1.5px solid;
+    padding: 1.25rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .correction-card.correct { border-color: rgba(30,255,156,0.4); }
+  .correction-card.wrong { border-color: rgba(255,77,109,0.4); }
+  .correction-card::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+  .correction-card.correct::before { background: var(--green); }
+  .correction-card.wrong::before { background: var(--red); }
+  .corr-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.6rem;
+  }
+  .corr-qnum { font-family: 'Space Mono', monospace; font-size: 0.78rem; color: var(--muted); }
+  .corr-badge {
+    font-size: 0.72rem; font-weight: 800; padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+  }
+  .corr-badge.correct { background: rgba(30,255,156,0.15); color: var(--green); }
+  .corr-badge.wrong { background: rgba(255,77,109,0.15); color: var(--red); }
+  .corr-q { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.6rem; line-height: 1.4; }
+  .corr-options { font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.3rem; }
+  .corr-opt {
+    padding: 0.4rem 0.7rem; border-radius: 8px;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .corr-opt.your-ans.wrong { background: rgba(255,77,109,0.12); color: var(--red); }
+  .corr-opt.correct-ans { background: rgba(30,255,156,0.12); color: var(--green); }
+  .corr-opt.your-ans.correct { background: rgba(30,255,156,0.12); color: var(--green); }
+
+  .btn-retry {
+    display: block; margin: 2rem auto;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    color: var(--bg); font-family: 'Nunito', sans-serif;
+    font-size: 1rem; font-weight: 900;
+    padding: 0.9rem 2.5rem; border: none; border-radius: 999px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .btn-retry:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,212,255,0.4); }
+
+  /* CONFETTI */
+  .confetti-piece {
+    position: fixed; top: -10px;
+    width: 10px; height: 10px;
+    animation: confettiFall linear forwards;
+    z-index: 999; pointer-events: none;
+  }
+  @keyframes confettiFall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- WELCOME -->
+  <div id="welcome" class="screen active">
+    <div class="logo-badge">NextArc Education</div>
+    <h1 class="welcome-title">Year 7 <span>IGCSE</span><br/>Maths Quiz</h1>
+    <p class="welcome-sub">40 questions · Timed · Instant corrections · IGCSE Standard</p>
+    <div class="topic-pills">
+      <span class="pill pill-prob">Probability</span>
+      <span class="pill pill-tally">Tally Charts</span>
+      <span class="pill pill-alg">Algebra</span>
+      <span class="pill pill-ratio">Ratio</span>
+      <span class="pill pill-units">Units of Measurement</span>
+      <span class="pill pill-frac">Fractions &amp; Percentages</span>
+    </div>
+    <div class="info-cards">
+      <div class="info-card"><div class="val">40</div><div class="lbl">Questions</div></div>
+      <div class="info-card"><div class="val">40<span style="font-size:0.9rem">min</span></div><div class="lbl">Time Limit</div></div>
+      <div class="info-card"><div class="val">1pt</div><div class="lbl">Per Question</div></div>
+    </div>
+    <div class="name-input-wrap">
+      <label>Your Name</label>
+      <input type="text" id="studentName" placeholder="e.g. Amara Okonkwo" maxlength="40"/>
+    </div>
+    <button class="btn-start" onclick="startQuiz()">Start Quiz →</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz" class="screen">
+    <div class="quiz-header">
+      <div class="q-counter">Question <strong id="qNum">1</strong> of <strong>40</strong></div>
+      <div class="timer-wrap">
+        <span class="timer-icon">⏱</span>
+        <div id="timer">40:00</div>
+      </div>
+      <div style="width:100%; flex-basis: 100%;">
+        <div class="progress-bar-outer">
+          <div class="progress-bar-inner" id="progressBar" style="width:2.5%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="q-dots-wrap" id="qDots"></div>
+    <div class="question-card" id="questionCard">
+      <div id="topicTag" class="topic-tag"></div>
+      <div class="question-number" id="qNumLabel"></div>
+      <div class="question-text" id="qText"></div>
+      <div class="options-grid" id="optionsGrid"></div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn-nav btn-prev" onclick="navigate(-1)">← Prev</button>
+      <button class="btn-nav btn-next" id="btnNext" onclick="navigate(1)">Next →</button>
+      <button class="btn-nav btn-submit" id="btnSubmit" style="display:none" onclick="confirmSubmit()">Submit Quiz ✓</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results" class="screen">
+    <div class="results-header">
+      <div class="score-circle" id="scoreCircle">
+        <div class="score-num" id="scoreNum">-</div>
+        <div class="score-total">out of 40</div>
+      </div>
+      <div class="results-title" id="resultsTitle">—</div>
+      <div class="results-sub" id="resultsSub">—</div>
+    </div>
+    <div class="stats-row" id="statsRow"></div>
+    <div class="topic-breakdown" id="topicBreakdown"><h3>Performance by Topic</h3><div id="topicBars"></div></div>
+    <div class="corrections-title">📋 Full Review & Corrections</div>
+    <div id="correctionsList"></div>
+    <button class="btn-retry" onclick="retryQuiz()">🔄 Try Again</button>
+  </div>
+
+</div>
+
+<script>
+const QUESTIONS = [
+  // ── PROBABILITY (Q1–6) ──
+  { topic:"Probability", color:"#00d4ff", q:"A bag contains 4 red balls and 6 blue balls. A ball is picked at random. What is the probability of picking a red ball?", opts:["2/5","3/5","4/6","1/4"], ans:0 },
+  { topic:"Probability", color:"#00d4ff", q:"A fair six-sided die is rolled once. What is the probability of rolling a number greater than 4?", opts:["1/2","1/3","2/3","1/6"], ans:1 },
+  { topic:"Probability", color:"#00d4ff", q:"A spinner has 8 equal sections: 3 red, 2 blue and 3 green. What is the probability of landing on blue?", opts:["3/8","2/3","1/4","1/2"], ans:2 },
+  { topic:"Probability", color:"#00d4ff", q:"The probability of it raining tomorrow is 0.35. What is the probability that it will NOT rain tomorrow?", opts:["0.65","0.45","0.35","0.75"], ans:0 },
+  { topic:"Probability", color:"#00d4ff", q:"A card is chosen at random from cards numbered 1 to 20. What is the probability of choosing a multiple of 5?", opts:["1/4","1/10","1/2","1/5"], ans:3 },
+  { topic:"Probability", color:"#00d4ff", q:"A class has 12 boys and 18 girls. One student is chosen at random. What is the probability of choosing a girl?", opts:["2/5","3/5","1/2","18/12"], ans:1 },
+
+  // ── TALLY CHARTS (Q7–11) ──
+  { topic:"Tally Charts", color:"#ffd443", q:"A tally chart shows: ⁵⁺⁵⁺³ marks (||||  ||||  |||). How many items does this represent?", opts:["12","14","13","15"], ans:2 },
+  { topic:"Tally Charts", color:"#ffd443", q:"Monday's tally reads: |||| | (a group of 5 and one more). How many items were recorded on Monday?", opts:["5","6","7","4"], ans:1 },
+  { topic:"Tally Charts", color:"#ffd443", q:"A tally chart has 4 complete groups (|||| repeated 4 times). How many items in total?", opts:["20","16","24","12"], ans:0 },
+  { topic:"Tally Charts", color:"#ffd443", q:"A tally reads: |||| |||| |||| || (three full groups and two extra). What is the frequency?", opts:["14","15","16","17"], ans:3 },
+  { topic:"Tally Charts", color:"#ffd443", q:"Votes recorded: Maths = |||| || (7), English = |||| (5), Science = |||| ||| (8). Which subject got the most votes?", opts:["Maths (7)","English (5)","Science (8)","They are equal"], ans:2 },
+
+  // ── ALGEBRA (Q12–18) ──
+  { topic:"Algebra", color:"#a78bfa", q:"Solve for x:   2x + 5 = 13", opts:["x = 4","x = 9","x = 3","x = 6"], ans:0 },
+  { topic:"Algebra", color:"#a78bfa", q:"What is the value of 3a + 2b when a = 4 and b = 3?", opts:["20","18","12","24"], ans:1 },
+  { topic:"Algebra", color:"#a78bfa", q:"Simplify:   4x + 3y − 2x + y", opts:["6x + 4y","2x + 2y","4x + 3y","2x + 4y"], ans:3 },
+  { topic:"Algebra", color:"#a78bfa", q:"Solve for x:   5x − 3 = 22", opts:["x = 5","x = 4","x = 6","x = 7"], ans:0 },
+  { topic:"Algebra", color:"#a78bfa", q:"Which expression represents '5 more than twice a number n'?", opts:["5n + 2","n + 5","2n + 5","2(n + 5)"], ans:2 },
+  { topic:"Algebra", color:"#a78bfa", q:"Expand:   3(2x + 4)", opts:["6x + 4","6x + 7","6x + 12","5x + 12"], ans:2 },
+  { topic:"Algebra", color:"#a78bfa", q:"If y = 3x − 1, what is the value of y when x = 4?", opts:["y = 11","y = 9","y = 12","y = 10"], ans:0 },
+
+  // ── RATIO (Q19–24) ──
+  { topic:"Ratio", color:"#1eff9c", q:"Simplify the ratio   12 : 18", opts:["3:4","2:3","4:6","1:2"], ans:1 },
+  { topic:"Ratio", color:"#1eff9c", q:"Share £40 in the ratio 3 : 5. What is the smaller share?", opts:["£15","£20","£25","£10"], ans:0 },
+  { topic:"Ratio", color:"#1eff9c", q:"A recipe uses flour and sugar in the ratio 4 : 1. If you use 200 g of flour, how much sugar is needed?", opts:["40 g","25 g","50 g","80 g"], ans:2 },
+  { topic:"Ratio", color:"#1eff9c", q:"In a class, the ratio of boys to girls is 3 : 2. There are 30 students in total. How many are girls?", opts:["15","18","10","12"], ans:3 },
+  { topic:"Ratio", color:"#1eff9c", q:"Red paint and blue paint are mixed in the ratio 2 : 5. The total mixture is 14 litres. How many litres are red?", opts:["4","6","10","2"], ans:0 },
+  { topic:"Ratio", color:"#1eff9c", q:"Which ratio is equivalent to   5 : 15?", opts:["2:5","3:9","1:3","1:5"], ans:2 },
+
+  // ── UNITS OF MEASUREMENT (Q25–30) ──
+  { topic:"Units of Measurement", color:"#f97316", q:"How many centimetres are in 2.5 metres?", opts:["25 cm","2500 cm","250 cm","0.25 cm"], ans:2 },
+  { topic:"Units of Measurement", color:"#f97316", q:"Convert 3.5 kg into grams.", opts:["3500 g","350 g","3050 g","35 g"], ans:0 },
+  { topic:"Units of Measurement", color:"#f97316", q:"A bottle holds 1.5 litres. How many millilitres is this?", opts:["150 ml","15 000 ml","15 ml","1500 ml"], ans:3 },
+  { topic:"Units of Measurement", color:"#f97316", q:"Which unit would be most appropriate for measuring the length of a football pitch?", opts:["Centimetres","Metres","Millimetres","Kilometres"], ans:1 },
+  { topic:"Units of Measurement", color:"#f97316", q:"Convert 240 minutes into hours.", opts:["2 hours","6 hours","3 hours","4 hours"], ans:3 },
+  { topic:"Units of Measurement", color:"#f97316", q:"A piece of wood is 85 mm long. What is this length in centimetres?", opts:["8.5 cm","85 cm","850 cm","0.85 cm"], ans:0 },
+
+  // ── FRACTIONS & PERCENTAGES (Q31–40) ──
+  { topic:"Fractions & %", color:"#e879f9", q:"Write 3/4 as a percentage.", opts:["34%","60%","75%","80%"], ans:2 },
+  { topic:"Fractions & %", color:"#e879f9", q:"Calculate 25% of £80.", opts:["£20","£25","£40","£15"], ans:0 },
+  { topic:"Fractions & %", color:"#e879f9", q:"Simplify the fraction   18/24.", opts:["2/3","3/4","5/8","9/12"], ans:1 },
+  { topic:"Fractions & %", color:"#e879f9", q:"Calculate:   2/5 + 1/3. Give your answer as a fraction.", opts:["3/8","3/15","13/15","11/15"], ans:3 },
+  { topic:"Fractions & %", color:"#e879f9", q:"A jacket costs £60. It is reduced by 20%. What is the new price?", opts:["£48","£50","£40","£52"], ans:0 },
+  { topic:"Fractions & %", color:"#e879f9", q:"Convert 0.65 to a fraction in its simplest form.", opts:["65/100","13/20","3/5","7/10"], ans:1 },
+  { topic:"Fractions & %", color:"#e879f9", q:"What is 3/8 of 64?", opts:["24","16","32","8"], ans:0 },
+  { topic:"Fractions & %", color:"#e879f9", q:"What percentage is 45 out of 60?", opts:["80%","45%","75%","60%"], ans:2 },
+  { topic:"Fractions & %", color:"#e879f9", q:"Order these fractions from smallest to largest:   1/2,  3/5,  2/5", opts:["1/2, 2/5, 3/5","3/5, 1/2, 2/5","2/5, 3/5, 1/2","2/5, 1/2, 3/5"], ans:3 },
+  { topic:"Fractions & %", color:"#e879f9", q:"A school has 400 students. 15% of the students are in Year 7. How many Year 7 students are there?", opts:["40","80","15","60"], ans:3 },
+];
+
+let currentQ = 0;
+let userAnswers = new Array(40).fill(null);
+let timerInterval = null;
+let secondsLeft = 40 * 60;
+let studentName = "";
+
+function startQuiz() {
+  studentName = document.getElementById('studentName').value.trim() || "Student";
+  document.getElementById('welcome').classList.remove('active');
+  document.getElementById('quiz').classList.add('active');
+  buildDots();
+  renderQuestion(0);
+  startTimer();
+}
+
+function buildDots() {
+  const wrap = document.getElementById('qDots');
+  wrap.innerHTML = '';
+  QUESTIONS.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'q-dot';
+    d.textContent = i + 1;
+    d.id = `dot-${i}`;
+    d.onclick = () => { navigate(i - currentQ); };
+    wrap.appendChild(d);
+  });
+}
+
+function updateDots() {
+  QUESTIONS.forEach((_, i) => {
+    const d = document.getElementById(`dot-${i}`);
+    d.className = 'q-dot';
+    if (i === currentQ) d.classList.add('current');
+    else if (userAnswers[i] !== null) d.classList.add('answered');
+  });
+}
+
+function renderQuestion(idx) {
+  const q = QUESTIONS[idx];
+  document.getElementById('qNum').textContent = idx + 1;
+  document.getElementById('qNumLabel').textContent = `Question ${idx + 1} of 40`;
+
+  const tag = document.getElementById('topicTag');
+  tag.textContent = q.topic;
+  tag.style.borderColor = q.color;
+  tag.style.color = q.color;
+  tag.style.background = q.color + '18';
+
+  document.getElementById('qText').textContent = q.q;
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  const labels = ['A','B','C','D'];
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    if (userAnswers[idx] === i) btn.classList.add('selected');
+    btn.innerHTML = `<span class="option-label">${labels[i]}</span> ${opt}`;
+    btn.onclick = () => selectAnswer(i);
+    grid.appendChild(btn);
+  });
+
+  const progress = ((idx + 1) / 40) * 100;
+  document.getElementById('progressBar').style.width = progress + '%';
+
+  const btnNext = document.getElementById('btnNext');
+  const btnSubmit = document.getElementById('btnSubmit');
+  if (idx === 39) { btnNext.style.display = 'none'; btnSubmit.style.display = 'inline-flex'; }
+  else { btnNext.style.display = 'inline-flex'; btnSubmit.style.display = 'none'; }
+
+  updateDots();
+
+  // Animate card
+  const card = document.getElementById('questionCard');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'slideUp 0.3s ease';
+}
+
+function selectAnswer(i) {
+  userAnswers[currentQ] = i;
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((b, bi) => {
+    b.classList.toggle('selected', bi === i);
+  });
+  updateDots();
+}
+
+function navigate(delta) {
+  const next = currentQ + delta;
+  if (next < 0 || next > 39) return;
+  currentQ = next;
+  renderQuestion(currentQ);
+}
+
+function startTimer() {
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    secondsLeft--;
+    updateTimerDisplay();
+    if (secondsLeft <= 0) {
+      clearInterval(timerInterval);
+      submitQuiz();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(secondsLeft / 60);
+  const s = secondsLeft % 60;
+  const el = document.getElementById('timer');
+  el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if (secondsLeft <= 120) el.classList.add('urgent');
+  else el.classList.remove('urgent');
+}
+
+function confirmSubmit() {
+  const unanswered = userAnswers.filter(a => a === null).length;
+  if (unanswered > 0) {
+    const go = confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`);
+    if (!go) return;
+  }
+  submitQuiz();
+}
+
+function submitQuiz() {
+  clearInterval(timerInterval);
+  buildResults();
+  document.getElementById('quiz').classList.remove('active');
+  document.getElementById('results').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function buildResults() {
+  let score = 0;
+  const topicData = {};
+
+  QUESTIONS.forEach((q, i) => {
+    if (!topicData[q.topic]) topicData[q.topic] = { correct: 0, total: 0, color: q.color };
+    topicData[q.topic].total++;
+    if (userAnswers[i] === q.ans) {
+      score++;
+      topicData[q.topic].correct++;
+    }
+  });
+
+  const pct = Math.round((score / 40) * 100);
+  const circle = document.getElementById('scoreCircle');
+  const scoreNum = document.getElementById('scoreNum');
+  const title = document.getElementById('resultsTitle');
+  const sub = document.getElementById('resultsSub');
+
+  scoreNum.textContent = score;
+  circle.className = 'score-circle ' + (pct >= 80 ? 'excellent' : pct >= 60 ? 'good' : pct >= 40 ? 'average' : 'poor');
+  scoreNum.style.color = pct >= 80 ? '#1eff9c' : pct >= 60 ? '#00d4ff' : pct >= 40 ? '#ffd443' : '#ff4d6d';
+
+  if (pct >= 80) { title.textContent = `Excellent work, ${studentName}! 🏆`; sub.textContent = "Outstanding performance. Keep it up!"; launchConfetti(); }
+  else if (pct >= 60) { title.textContent = `Well done, ${studentName}! 👏`; sub.textContent = "Good effort — review the corrections below to improve further."; }
+  else if (pct >= 40) { title.textContent = `Keep practising, ${studentName}! 💪`; sub.textContent = "You're getting there. Study the corrections carefully."; }
+  else { title.textContent = `Don't give up, ${studentName}! 📚`; sub.textContent = "Revisit your notes and try again — you've got this!"; }
+
+  // Stats
+  const wrong = 40 - score;
+  const unanswered = userAnswers.filter(a => a === null).length;
+  const timeTaken = 40 * 60 - secondsLeft;
+  const mm = Math.floor(timeTaken / 60), ss = timeTaken % 60;
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-box"><div class="sv" style="color:#1eff9c">${score}</div><div class="sl">Correct</div></div>
+    <div class="stat-box"><div class="sv" style="color:#ff4d6d">${wrong}</div><div class="sl">Wrong</div></div>
+    <div class="stat-box"><div class="sv" style="color:#ffd443">${pct}%</div><div class="sl">Score</div></div>
+    <div class="stat-box"><div class="sv" style="color:#a78bfa">${mm}m ${String(ss).padStart(2,'0')}s</div><div class="sl">Time Taken</div></div>
+  `;
+
+  // Topic bars
+  const barsWrap = document.getElementById('topicBars');
+  barsWrap.innerHTML = '';
+  Object.entries(topicData).forEach(([name, d]) => {
+    const p = Math.round((d.correct / d.total) * 100);
+    barsWrap.innerHTML += `
+      <div class="topic-row">
+        <div class="topic-name" style="color:${d.color}">${name}</div>
+        <div class="topic-bar-outer"><div class="topic-bar-inner" style="width:${p}%;background:${d.color}"></div></div>
+        <div class="topic-score-lbl">${d.correct}/${d.total}</div>
+      </div>`;
+  });
+
+  // Corrections
+  const list = document.getElementById('correctionsList');
+  list.innerHTML = '';
+  QUESTIONS.forEach((q, i) => {
+    const isCorrect = userAnswers[i] === q.ans;
+    const userAns = userAnswers[i];
+    const card = document.createElement('div');
+    card.className = `correction-card ${isCorrect ? 'correct' : 'wrong'}`;
+
+    let optsHtml = '';
+    q.opts.forEach((opt, oi) => {
+      let cls = '';
+      if (oi === q.ans) cls = 'correct-ans';
+      if (oi === userAns && !isCorrect) cls = 'your-ans wrong';
+      if (oi === userAns && isCorrect) cls = 'your-ans correct';
+      const icons = { 'correct-ans': '✓', 'your-ans wrong': '✗', 'your-ans correct': '✓' };
+      const icon = icons[cls] || '';
+      const label = ['A','B','C','D'][oi];
+      optsHtml += `<div class="corr-opt ${cls}">${icon ? `<strong>${icon}</strong>` : '<span style="width:14px"></span>'} <strong>${label}.</strong> ${opt}${cls === 'correct-ans' && !isCorrect ? ' ← Correct Answer' : ''}${cls === 'your-ans wrong' ? ' ← Your Answer' : ''}</div>`;
+    });
+
+    card.innerHTML = `
+      <div class="corr-header">
+        <span class="corr-qnum">Q${i+1} · ${q.topic}</span>
+        <span class="corr-badge ${isCorrect ? 'correct' : 'wrong'}">${isCorrect ? '✓ Correct' : '✗ Incorrect'}</span>
+      </div>
+      <div class="corr-q">${q.q}</div>
+      <div class="corr-options">${optsHtml}</div>`;
+    list.appendChild(card);
+  });
+}
+
+function launchConfetti() {
+  const colors = ['#00d4ff','#ffd443','#1eff9c','#a78bfa','#ff4d6d','#f97316','#e879f9'];
+  for (let i = 0; i < 80; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    piece.style.animationDuration = (2 + Math.random() * 3) + 's';
+    piece.style.animationDelay = (Math.random() * 2) + 's';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 6000);
+  }
+}
+
+function retryQuiz() {
+  userAnswers = new Array(40).fill(null);
+  currentQ = 0;
+  secondsLeft = 40 * 60;
+  document.getElementById('results').classList.remove('active');
+  document.getElementById('welcome').classList.add('active');
+  document.getElementById('timer').classList.remove('urgent');
+}
+</script>
+</body>
+</html>
