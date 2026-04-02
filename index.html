@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Year 7 Maths Quiz</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f2f1ed;
+    --surface: #ffffff;
+    --surface2: #ebe9e4;
+    --text: #1a1a18;
+    --text2: #6b6a65;
+    --text3: #a09f9a;
+    --border: rgba(0,0,0,0.11);
+    --border2: rgba(0,0,0,0.20);
+    --green-bg: #e1f5ee; --green-text: #085041; --green-bd: #1D9E75;
+    --red-bg: #faece7; --red-text: #4a1b0c; --red-bd: #D85A30;
+    --amber: #EF9F27;
+    --r: 10px; --rl: 14px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem 3rem; }
+  .container { width: 100%; max-width: 700px; }
+
+  .brand { text-align: center; margin-bottom: 2rem; }
+  .badge { display: inline-block; background: var(--text); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 4px 14px; border-radius: 99px; margin-bottom: 10px; }
+  .brand h1 { font-size: 30px; font-weight: 800; letter-spacing: -.02em; }
+  .brand p { font-size: 15px; color: var(--text2); margin-top: 5px; }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* START */
+  .start-card { background: var(--surface); border-radius: var(--rl); border: 1px solid var(--border); padding: 2rem; }
+  .info-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 1.5rem; }
+  @media(max-width:480px){ .info-row { grid-template-columns: repeat(2,1fr); } }
+  .info-tile { background: var(--surface2); border-radius: var(--r); padding: .875rem .75rem; text-align: center; }
+  .info-tile .num { font-size: 22px; font-weight: 800; }
+  .info-tile .lbl { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .topics { background: var(--surface2); border-radius: var(--r); padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
+  .topics h3 { font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+  .topic-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .topic-tag { background: var(--surface); border: 1px solid var(--border2); border-radius: 99px; font-size: 12px; padding: 3px 11px; color: var(--text2); }
+  .name-section { margin-bottom: 1.25rem; }
+  .name-section label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text2); text-transform: uppercase; letter-spacing: .07em; }
+  .name-section input { width: 100%; padding: 13px 16px; border: 1.5px solid var(--border2); border-radius: var(--r); font-size: 15px; background: var(--surface2); color: var(--text); outline: none; transition: border-color .2s; }
+  .name-section input:focus { border-color: var(--text); background: var(--surface); }
+  .name-section input::placeholder { color: var(--text3); }
+  .btn-primary { display: block; width: 100%; background: var(--text); color: #fff; border: none; border-radius: var(--r); padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity .15s; }
+  .btn-primary:hover { opacity: .82; }
+  .btn-primary:disabled { opacity: .35; cursor: default; }
+
+  /* QUIZ */
+  .quiz-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; flex-wrap: wrap; gap: .5rem; }
+  .q-meta { display: flex; flex-direction: column; gap: 2px; }
+  .q-counter { font-size: 14px; color: var(--text2); font-weight: 600; }
+  .name-tag-small { font-size: 13px; color: var(--text3); font-style: italic; }
+  .timer-pill { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 99px; padding: 6px 16px; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; transition: color .3s, border-color .3s, background .3s; }
+  .timer-pill.urgent { color: var(--red-bd); border-color: var(--red-bd); background: var(--red-bg); }
+  .prog-bar { height: 5px; background: var(--surface2); border-radius: 3px; margin-bottom: 1.25rem; overflow: hidden; }
+  .prog-fill { height: 100%; background: var(--text); border-radius: 3px; transition: width .35s; }
+
+  .topic-chip { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .06em; }
+  .chip-ratio   { background: #e6f1fb; color: #042C53; }
+  .chip-prob    { background: #faeeda; color: #412402; }
+  .chip-algebra { background: #eaf3de; color: #173404; }
+  .chip-circle  { background: #fbeaf0; color: #4B1528; }
+  .chip-angles  { background: #eeedfe; color: #26215C; }
+
+  .q-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rl); padding: 1.5rem; margin-bottom: 1rem; }
+  .q-num { font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+  .q-text { font-size: 16px; line-height: 1.65; font-weight: 500; }
+
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+  @media(max-width:480px){ .options-grid { grid-template-columns: 1fr; } }
+  .opt-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); padding: 13px 16px; font-size: 14px; font-weight: 500; color: var(--text); cursor: pointer; text-align: left; transition: border-color .15s, background .15s, transform .1s; line-height: 1.4; }
+  .opt-btn:hover:not(:disabled) { border-color: var(--border2); background: var(--surface2); transform: translateY(-1px); }
+  .opt-btn.correct { border-color: var(--green-bd); background: var(--green-bg); color: var(--green-text); }
+  .opt-btn.wrong   { border-color: var(--red-bd);   background: var(--red-bg);   color: var(--red-text); }
+  .opt-btn:disabled { cursor: default; transform: none; }
+
+  .nav-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .q-dots { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; }
+  .q-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--surface2); border: 1.5px solid var(--border); cursor: pointer; transition: background .15s; }
+  .q-dot.answered { background: var(--text2); border-color: transparent; }
+  .q-dot.current  { background: var(--text);  border-color: transparent; box-shadow: 0 0 0 3px rgba(26,26,24,.15); }
+  .btn-next { background: var(--text); color: #fff; border: none; border-radius: var(--r); padding: 11px 24px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: opacity .15s; }
+  .btn-next:hover { opacity: .82; }
+  .btn-next:disabled { opacity: .3; cursor: default; }
+
+  /* SUBMITTING */
+  #submitting-screen { text-align: center; padding: 4rem 1rem; }
+  .spin { width: 48px; height: 48px; border: 4px solid var(--surface2); border-top-color: var(--text); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1.5rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #submitting-screen h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  #submitting-screen p { color: var(--text2); font-size: 14px; }
+
+  /* RESULT */
+  #result-screen { text-align: center; }
+  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rl); padding: 2rem 1.5rem; margin-bottom: 1rem; }
+  .student-result-name { font-size: 14px; font-weight: 600; color: var(--text2); margin-bottom: .75rem; }
+  .ring-wrap { position: relative; width: 160px; height: 160px; margin: 0 auto 1.25rem; }
+  .ring-wrap svg { width: 160px; height: 160px; }
+  .ring-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+  .ring-pct { font-size: 32px; font-weight: 800; }
+  .ring-sub { font-size: 12px; color: var(--text2); }
+  .result-title { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+  .result-sub { font-size: 14px; color: var(--text2); margin-bottom: 1.25rem; line-height: 1.6; max-width: 420px; margin-left: auto; margin-right: auto; }
+  .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 1rem; }
+  .stat-tile { background: var(--surface2); border-radius: var(--r); padding: .875rem .75rem; }
+  .stat-num { font-size: 22px; font-weight: 800; }
+  .stat-lbl { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .s-correct { color: var(--green-bd); } .s-wrong { color: var(--red-bd); } .s-time { color: var(--text); }
+  .breakdown-box { background: var(--surface2); border-radius: var(--r); padding: 1rem 1.25rem; margin-bottom: 1.25rem; text-align: left; }
+  .breakdown-box h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text2); margin-bottom: 10px; }
+  .bd-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+  .bd-bar-wrap { flex: 1; height: 6px; background: var(--border); border-radius: 3px; margin: 0 10px; overflow: hidden; }
+  .bd-bar { height: 100%; border-radius: 3px; background: var(--green-bd); transition: width 1s ease; }
+  .bd-score { font-weight: 700; font-size: 12px; color: var(--text2); min-width: 32px; text-align: right; }
+  .email-note { font-size: 12px; color: var(--text3); margin-bottom: 1.25rem; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-outline { flex: 1; background: transparent; color: var(--text); border: 1.5px solid var(--border2); border-radius: var(--r); padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background .15s; }
+  .btn-outline:hover { background: var(--surface2); }
+  .btn-solid { flex: 1; background: var(--text); color: #fff; border: none; border-radius: var(--r); padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity .15s; }
+  .btn-solid:hover { opacity: .82; }
+
+  /* REVIEW */
+  #review-screen h2 { font-size: 20px; font-weight: 800; margin-bottom: 1rem; }
+  .review-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--rl); padding: 1rem 1.25rem; margin-bottom: 10px; }
+  .review-item.ri-c { border-color: var(--green-bd); }
+  .review-item.ri-w { border-color: var(--red-bd); }
+  .ri-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .ri-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+  .b-c { background: var(--green-bg); color: var(--green-text); }
+  .b-w { background: var(--red-bg); color: var(--red-text); }
+  .ri-qn { font-size: 12px; color: var(--text3); }
+  .ri-q { font-size: 14px; font-weight: 500; margin-bottom: 8px; line-height: 1.5; }
+  .ri-ans { font-size: 13px; color: var(--text2); }
+  .ri-ans strong { color: var(--text); }
+  .btn-back { display: inline-block; background: transparent; color: var(--text); border: 1.5px solid var(--border2); border-radius: var(--r); padding: 11px 24px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 1rem; transition: background .15s; }
+  .btn-back:hover { background: var(--surface2); }
+  footer { text-align: center; margin-top: 2rem; font-size: 12px; color: var(--text3); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="brand">
+    <div class="badge">Year 7 Mathematics</div>
+    <h1>Maths Reasoning Quiz</h1>
+    <p>40 questions · 6 topics · 30 minutes</p>
+  </div>
+
+  <!-- START -->
+  <div id="start-screen" class="screen active">
+    <div class="start-card">
+      <div class="info-row">
+        <div class="info-tile"><div class="num">40</div><div class="lbl">Questions</div></div>
+        <div class="info-tile"><div class="num">30</div><div class="lbl">Minutes</div></div>
+        <div class="info-tile"><div class="num">6</div><div class="lbl">Topics</div></div>
+        <div class="info-tile"><div class="num">4</div><div class="lbl">Options each</div></div>
+      </div>
+      <div class="topics">
+        <h3>Topics covered</h3>
+        <div class="topic-tags">
+          <span class="topic-tag">Ratio &amp; Proportion</span>
+          <span class="topic-tag">Probability</span>
+          <span class="topic-tag">Algebra</span>
+          <span class="topic-tag">Circles</span>
+          <span class="topic-tag">Angles</span>
+          <span class="topic-tag">Direct &amp; Inverse Proportion</span>
+        </div>
+      </div>
+      <div class="name-section">
+        <label for="student-name">Your full name</label>
+        <input type="text" id="student-name" placeholder="e.g. Amara Johnson" autocomplete="name" />
+      </div>
+      <button class="btn-primary" id="start-btn" disabled>Enter your name to begin →</button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen" class="screen">
+    <div class="quiz-header">
+      <div class="q-meta">
+        <div class="q-counter" id="q-counter">Question 1 of 40</div>
+        <div class="name-tag-small" id="name-tag"></div>
+      </div>
+      <div class="timer-pill" id="timer-pill">⏱ <span id="timer-display">30:00</span></div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:2.5%"></div></div>
+    <div class="q-card">
+      <div class="q-num" id="q-num">Q1</div>
+      <div id="q-chip"></div>
+      <div class="q-text" id="q-text"></div>
+    </div>
+    <div class="options-grid" id="options-grid"></div>
+    <div class="nav-row">
+      <div class="q-dots" id="q-dots"></div>
+      <button class="btn-next" id="next-btn" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- SUBMITTING -->
+  <div id="submitting-screen" class="screen">
+    <div class="spin"></div>
+    <h2>Submitting your exam…</h2>
+    <p>Sending your results to your teacher. Please wait.</p>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result-screen" class="screen">
+    <div class="result-card">
+      <div class="student-result-name" id="student-result-name"></div>
+      <div class="ring-wrap">
+        <svg viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="66" fill="none" stroke="#ebe9e4" stroke-width="12"/>
+          <circle id="score-arc" cx="80" cy="80" r="66" fill="none" stroke="#1D9E75"
+            stroke-width="12" stroke-linecap="round"
+            stroke-dasharray="414.7" stroke-dashoffset="414.7"
+            transform="rotate(-90 80 80)" style="transition: stroke-dashoffset 1.2s ease, stroke .5s;"/>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-pct" id="ring-pct">0%</div>
+          <div class="ring-sub">score</div>
+        </div>
+      </div>
+      <div class="result-title" id="result-title">–</div>
+      <div class="result-sub" id="result-sub">–</div>
+      <div class="stats-row">
+        <div class="stat-tile"><div class="stat-num s-correct" id="r-correct">0</div><div class="stat-lbl">Correct</div></div>
+        <div class="stat-tile"><div class="stat-num s-wrong"   id="r-wrong">0</div><div class="stat-lbl">Wrong</div></div>
+        <div class="stat-tile"><div class="stat-num s-time"    id="r-time">–</div><div class="stat-lbl">Time used</div></div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Topic breakdown</h4>
+        <div id="breakdown-rows"></div>
+      </div>
+      <div class="email-note" id="email-note">📧 Your score has been sent to your teacher.</div>
+      <div class="btn-row">
+        <button class="btn-outline" id="retry-btn">Try again</button>
+        <button class="btn-solid"   id="review-btn">Review answers</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEW -->
+  <div id="review-screen" class="screen">
+    <h2>Answer Review</h2>
+    <div id="review-list"></div>
+    <button class="btn-back" id="back-btn">← Back to results</button>
+  </div>
+
+  <footer>Year 7 Maths Quiz &nbsp;·&nbsp; Good luck! 🍀</footer>
+</div>
+
+<script>
+// ── EmailJS — set up FREE account at emailjs.com then fill in these 3 values ──
+const EMAILJS_PUBLIC_KEY  = "FillInYourPublicKey";
+const EMAILJS_SERVICE_ID  = "FillInYourServiceId";
+const EMAILJS_TEMPLATE_ID = "FillInYourTemplateId";
+const TEACHER_EMAIL       = "samueladeolajob@gmail.com";
+
+// ── Questions ────────────────────────────────────────────────────────────────
+const Q = [
+  // RATIO & PROPORTION (1–8)
+  {t:"ratio",tl:"Ratio & Proportion", q:"A bag has red and blue marbles in the ratio 3:5. There are 24 red marbles. How many blue marbles are there?", o:["30","40","45","35"], a:1},
+  {t:"ratio",tl:"Ratio & Proportion", q:"Divide £840 between Ali and Beth in the ratio 5:3. How much does Ali receive?", o:["£420","£525","£315","£480"], a:1},
+  {t:"ratio",tl:"Ratio & Proportion", q:"A recipe needs flour and sugar in the ratio 5:2. You use 350 g of flour. How much sugar do you need?", o:["120 g","140 g","150 g","160 g"], a:1},
+  {t:"ratio",tl:"Ratio & Proportion", q:"A car travels 180 km in 3 hours. How far does it travel in 5 hours at the same speed?", o:["270 km","300 km","320 km","350 km"], a:1},
+  {t:"ratio",tl:"Ratio & Proportion", q:"The ratio of boys to girls in a class is 4:3. There are 28 boys. How many students are there altogether?", o:["42","49","45","35"], a:1},
+  {t:"ratio",tl:"Ratio & Proportion", q:"A map has a scale of 1:50,000. A road is 6 cm on the map. What is its actual length in km?", o:["2.5 km","3 km","3.5 km","4 km"], a:1},
+  {t:"ratio",tl:"Ratio & Proportion", q:"Three friends share £126 in the ratio 2:3:4. What is the largest share?", o:["£42","£36","£56","£48"], a:2},
+  {t:"ratio",tl:"Ratio & Proportion", q:"If 6 identical books cost £18, how much do 10 of the same books cost?", o:["£25","£28","£30","£32"], a:2},
+
+  // PROBABILITY (9–16)
+  {t:"prob",tl:"Probability", q:"A fair six-sided die is rolled. What is the probability of rolling a 4?", o:["1/3","1/4","1/6","1/2"], a:2},
+  {t:"prob",tl:"Probability", q:"A bag contains 3 red, 5 blue and 2 green counters. One is picked at random. What is the probability it is blue?", o:["1/2","3/10","5/10","1/5"], a:2},
+  {t:"prob",tl:"Probability", q:"The probability that it rains on any day is 0.3. What is the probability it does NOT rain?", o:["0.3","0.6","0.7","0.03"], a:2},
+  {t:"prob",tl:"Probability", q:"A spinner has 8 equal sections numbered 1–8. What is the probability of landing on an even number?", o:["1/4","3/8","1/2","5/8"], a:2},
+  {t:"prob",tl:"Probability", q:"A letter is chosen at random from the word MATHEMATICS. What is the probability of choosing the letter M?", o:["1/11","2/11","3/11","2/10"], a:1},
+  {t:"prob",tl:"Probability", q:"An event has a probability of 0.45. How many times would you expect it to happen in 200 trials?", o:["45","80","90","100"], a:2},
+  {t:"prob",tl:"Probability", q:"Which of these represents an impossible event?", o:["P = 0.5","P = 1","P = 0","P = 0.1"], a:2},
+  {t:"prob",tl:"Probability", q:"Two coins are flipped. What is the probability of getting exactly one head?", o:["1/4","1/2","3/4","1/3"], a:1},
+
+  // ALGEBRA (17–24)
+  {t:"algebra",tl:"Algebra", q:"Solve: 3x + 7 = 22. What is x?", o:["3","4","5","6"], a:2},
+  {t:"algebra",tl:"Algebra", q:"Simplify: 4a + 3b − 2a + b", o:["6a + 4b","2a + 4b","2a + 2b","4a + 2b"], a:1},
+  {t:"algebra",tl:"Algebra", q:"What is the value of 5x − 3 when x = 4?", o:["15","17","19","23"], a:1},
+  {t:"algebra",tl:"Algebra", q:"Expand: 3(2x + 5)", o:["5x + 8","6x + 8","6x + 15","6x + 5"], a:2},
+  {t:"algebra",tl:"Algebra", q:"Solve: 2x − 3 = 11. What is x?", o:["4","5","6","7"], a:3},
+  {t:"algebra",tl:"Algebra", q:"A number is multiplied by 4 and then 6 is subtracted. The result is 18. What is the number?", o:["4","5","6","7"], a:2},
+  {t:"algebra",tl:"Algebra", q:"Factorise: 6x + 9", o:["2(3x + 4)","3(2x + 3)","6(x + 3)","3(x + 3)"], a:1},
+  {t:"algebra",tl:"Algebra", q:"Which expression is equivalent to 2(x + 4) + 3x?", o:["5x + 4","5x + 8","7x + 4","7x + 8"], a:1},
+
+  // CIRCLES (25–32)
+  {t:"circle",tl:"Circles", q:"What is the circumference of a circle with diameter 10 cm? (Use π ≈ 3.14)", o:["31.4 cm","15.7 cm","62.8 cm","28.3 cm"], a:0},
+  {t:"circle",tl:"Circles", q:"What is the area of a circle with radius 5 cm? (Use π ≈ 3.14)", o:["15.7 cm²","31.4 cm²","78.5 cm²","157 cm²"], a:2},
+  {t:"circle",tl:"Circles", q:"The radius of a circle is 7 cm. What is its diameter?", o:["3.5 cm","7 cm","14 cm","21 cm"], a:2},
+  {t:"circle",tl:"Circles", q:"A circle has a circumference of 62.8 cm. What is its radius? (Use π ≈ 3.14)", o:["5 cm","10 cm","20 cm","15 cm"], a:1},
+  {t:"circle",tl:"Circles", q:"What is the name of the distance from the centre of a circle to its edge?", o:["Diameter","Circumference","Chord","Radius"], a:3},
+  {t:"circle",tl:"Circles", q:"What is the area of a circle with diameter 12 cm? (Use π ≈ 3.14)", o:["37.68 cm²","75.36 cm²","113.04 cm²","150.72 cm²"], a:2},
+  {t:"circle",tl:"Circles", q:"A semicircle has a diameter of 8 cm. What is the area of the semicircle? (Use π ≈ 3.14)", o:["12.56 cm²","25.12 cm²","50.24 cm²","100.48 cm²"], a:1},
+  {t:"circle",tl:"Circles", q:"Which formula gives the circumference of a circle with radius r?", o:["πr²","2πr","πr","2πr²"], a:1},
+
+  // ANGLES (33–40)
+  {t:"angles",tl:"Angles", q:"Angles on a straight line add up to how many degrees?", o:["90°","180°","270°","360°"], a:1},
+  {t:"angles",tl:"Angles", q:"A triangle has angles of 50° and 70°. What is the third angle?", o:["50°","60°","70°","80°"], a:1},
+  {t:"angles",tl:"Angles", q:"What do the interior angles in a quadrilateral add up to?", o:["180°","270°","360°","540°"], a:2},
+  {t:"angles",tl:"Angles", q:"Two angles are supplementary. One is 65°. What is the other?", o:["25°","115°","125°","155°"], a:1},
+  {t:"angles",tl:"Angles", q:"What type of angle is exactly 90°?", o:["Acute","Obtuse","Right angle","Reflex"], a:2},
+  {t:"angles",tl:"Angles", q:"Vertically opposite angles are always…", o:["supplementary","complementary","equal","different"], a:2},
+  {t:"angles",tl:"Angles", q:"An equilateral triangle has three equal angles. What is each angle?", o:["45°","60°","90°","120°"], a:1},
+  {t:"angles",tl:"Angles", q:"A regular hexagon's interior angles each measure how many degrees?", o:["90°","108°","120°","135°"], a:2},
+];
+
+const CHIP = {ratio:"chip-ratio",prob:"chip-prob",algebra:"chip-algebra",circle:"chip-circle",angles:"chip-angles"};
+
+let current=0, answers=[], timerInterval, elapsed=0, studentName="";
+
+function pad(n){return String(n).padStart(2,"0");}
+function fmt(s){return pad(Math.floor(s/60))+":"+pad(s%60);}
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
+
+// Name gating
+const nameInput=document.getElementById("student-name");
+const startBtn=document.getElementById("start-btn");
+nameInput.addEventListener("input",()=>{
+  const v=nameInput.value.trim();
+  startBtn.disabled=v.length<2;
+  startBtn.textContent=v.length>=2?"Start exam →":"Enter your name to begin →";
+});
+
+function startTimer(){
+  let rem=1800; elapsed=0;
+  timerInterval=setInterval(()=>{
+    rem--; elapsed++;
+    document.getElementById("timer-display").textContent=fmt(rem);
+    if(rem<=120) document.getElementById("timer-pill").classList.add("urgent");
+    if(rem<=0){clearInterval(timerInterval);submitQuiz(true);}
+  },1000);
+}
+
+function renderQ(){
+  const q=Q[current];
+  document.getElementById("q-counter").textContent="Question "+(current+1)+" of "+Q.length;
+  document.getElementById("q-num").textContent="Q"+(current+1);
+  document.getElementById("q-text").textContent=q.q;
+  document.getElementById("prog-fill").style.width=((current+1)/Q.length*100)+"%";
+  document.getElementById("next-btn").disabled=answers[current]===undefined;
+  document.getElementById("q-chip").innerHTML=`<span class="topic-chip ${CHIP[q.t]}">${q.tl}</span>`;
+
+  const grid=document.getElementById("options-grid");
+  grid.innerHTML="";
+  q.o.forEach((opt,i)=>{
+    const btn=document.createElement("button");
+    btn.className="opt-btn"; btn.textContent=opt;
+    if(answers[current]!==undefined){
+      btn.disabled=true;
+      if(i===q.a) btn.classList.add("correct");
+      else if(i===answers[current]) btn.classList.add("wrong");
+    } else {
+      btn.addEventListener("click",()=>{answers[current]=i;renderQ();});
+    }
+    grid.appendChild(btn);
+  });
+
+  const dots=document.getElementById("q-dots");
+  dots.innerHTML="";
+  Q.forEach((_,i)=>{
+    const d=document.createElement("div");
+    d.className="q-dot"+(i===current?" current":answers[i]!==undefined?" answered":"");
+    d.title="Q"+(i+1);
+    d.addEventListener("click",()=>{current=i;renderQ();});
+    dots.appendChild(d);
+  });
+}
+
+async function submitQuiz(auto=false){
+  clearInterval(timerInterval);
+  show("submitting-screen");
+
+  let correct=0;
+  Q.forEach((q,i)=>{if(answers[i]===q.a)correct++;});
+  const total=Q.length, pct=Math.round(correct/total*100), timeUsed=fmt(elapsed);
+
+  // Per-topic breakdown
+  const topics={};
+  Q.forEach((q,i)=>{
+    if(!topics[q.tl])topics[q.tl]={c:0,t:0};
+    topics[q.tl].t++;
+    if(answers[i]===q.a)topics[q.tl].c++;
+  });
+  const breakdownText=Object.entries(topics).map(([k,v])=>`${k}: ${v.c}/${v.t}`).join("\n");
+
+  // Send email
+  let emailSent=false;
+  try{
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
+      to_email:   TEACHER_EMAIL,
+      student_name: studentName,
+      score:      correct+"/"+total,
+      percentage: pct+"%",
+      time_used:  timeUsed,
+      breakdown:  breakdownText,
+      submitted:  auto?"Auto-submitted (time ran out)":"Submitted by student",
+      date:       new Date().toLocaleString("en-GB"),
+    });
+    emailSent=true;
+  }catch(e){console.warn("Email error:",e);}
+
+  // Populate result screen
+  document.getElementById("ring-pct").textContent=pct+"%";
+  document.getElementById("r-correct").textContent=correct;
+  document.getElementById("r-wrong").textContent=total-correct;
+  document.getElementById("r-time").textContent=timeUsed;
+  document.getElementById("student-result-name").textContent=studentName+"'s results";
+  document.getElementById("email-note").textContent=emailSent
+    ?"📧 Your score has been emailed to your teacher."
+    :"📋 Exam submitted. Please share your score with your teacher.";
+
+  const arc=document.getElementById("score-arc");
+  setTimeout(()=>{
+    arc.style.strokeDashoffset=414.7-(pct/100)*414.7;
+    arc.style.stroke=pct>=70?"#1D9E75":pct>=50?"#EF9F27":"#D85A30";
+  },200);
+
+  const fn=studentName.split(" ")[0];
+  let title,sub;
+  if(pct>=90){title="🎉 Outstanding!";sub="Brilliant work, "+fn+"! You have a fantastic grasp of all six topics.";}
+  else if(pct>=70){title="👍 Well Done!";sub="Great effort, "+fn+"! A few areas to review but you should feel proud.";}
+  else if(pct>=50){title="📚 Good Effort!";sub="Keep going, "+fn+"! Look at the review below and focus on your weaker topics.";}
+  else{title="💪 Keep Practising!";sub="Don't worry, "+fn+"! Go through the review and ask your teacher for help with the topics you found hard.";}
+  document.getElementById("result-title").textContent=title;
+  document.getElementById("result-sub").textContent=sub;
+
+  // Topic breakdown bars
+  const bdRows=document.getElementById("breakdown-rows");
+  bdRows.innerHTML="";
+  Object.entries(topics).forEach(([k,v])=>{
+    const p=Math.round(v.c/v.t*100);
+    const row=document.createElement("div"); row.className="bd-row";
+    row.innerHTML=`<span style="font-size:13px;min-width:140px;color:var(--text2)">${k}</span>
+      <div class="bd-bar-wrap"><div class="bd-bar" style="width:0%" data-pct="${p}"></div></div>
+      <span class="bd-score">${v.c}/${v.t}</span>`;
+    bdRows.appendChild(row);
+  });
+  setTimeout(()=>{document.querySelectorAll(".bd-bar").forEach(b=>{b.style.width=b.dataset.pct+"%";if(b.dataset.pct<50)b.style.background="#D85A30";else if(b.dataset.pct<70)b.style.background="#EF9F27";});},300);
+
+  // Build review
+  const list=document.getElementById("review-list");
+  list.innerHTML="";
+  Q.forEach((q,i)=>{
+    const ok=answers[i]===q.a;
+    const ua=answers[i]!==undefined?q.o[answers[i]]:"Not answered";
+    const div=document.createElement("div");
+    div.className="review-item "+(ok?"ri-c":"ri-w");
+    div.innerHTML=`<div class="ri-head"><span class="ri-badge ${ok?"b-c":"b-w"}">${ok?"✓ Correct":"✗ Wrong"}</span><span class="ri-qn">Q${i+1} · ${q.tl}</span></div>
+      <div class="ri-q">${q.q}</div>
+      <div class="ri-ans">Your answer: <strong>${ua}</strong> &nbsp;|&nbsp; Correct: <strong>${q.o[q.a]}</strong></div>`;
+    list.appendChild(div);
+  });
+
+  show("result-screen");
+}
+
+function reset(){
+  current=0;answers=[];elapsed=0;
+  document.getElementById("timer-display").textContent="30:00";
+  document.getElementById("timer-pill").classList.remove("urgent");
+  document.getElementById("score-arc").style.strokeDashoffset="414.7";
+}
+
+document.getElementById("start-btn").addEventListener("click",()=>{
+  studentName=nameInput.value.trim();
+  document.getElementById("name-tag").textContent=studentName;
+  reset();show("quiz-screen");renderQ();startTimer();
+});
+document.getElementById("next-btn").addEventListener("click",()=>{
+  if(current<Q.length-1){current++;renderQ();}else{submitQuiz(false);}
+});
+document.getElementById("retry-btn").addEventListener("click",()=>{reset();show("quiz-screen");renderQ();startTimer();});
+document.getElementById("review-btn").addEventListener("click",()=>show("review-screen"));
+document.getElementById("back-btn").addEventListener("click",()=>show("result-screen"));
+</script>
+</body>
+</html>
